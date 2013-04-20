@@ -19,7 +19,7 @@ If you are using SuperFeed in a web app, then the `Application_Start()` method o
 
 After that, you can retrieve your super feed by calling either `GetMergedFeed()` or `GetMergedAndBalancedFeed()`. The former gives you all your feeds merged together. The latter takes this one step further by "balancing" your super feed to curb the number of consecutive `FeedItems` from any single social media site. This is useful if, for example, you have many more tweets than anything else, but don't want your super feed to be dominated by tweets.
 
-Take a look at `SuperFeedConsole.Program.Main()` for an implementation example: https://github.com/lonekorean/super-feed/blob/master/SuperFeedConsole/Program.cs
+Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github.com/lonekorean/super-feed/blob/master/SuperFeedConsole/Program.cs
 
 ###Supported Social Media Sites
 
@@ -35,3 +35,6 @@ The Flickr `FeedModule` requires your Flickr ID, which you can get here: http://
 
 The Instagram `FeedModule` requires a private token, which you can obtain with help from this page: http://www.blueprintinteractive.com/blog/how-instagram-api-fancybox-simplified
 
+###Example
+
+You can see SuperFeed in action on my website: http://codersblock.com/
