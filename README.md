@@ -23,12 +23,13 @@ Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github
 
 ###Supported Social Media Sites
 
-SuperFeed currently supports five social media sites:
+SuperFeed currently supports six social media sites:
 
 - Twitter
 - Blogger
 - Flickr
 - DeviantArt
+- GitHub
 - Instagram
 
 The Flickr `FeedModule` requires your Flickr ID, which you can get here: http://idgettr.com/
