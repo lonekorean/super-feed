@@ -46,6 +46,7 @@
     <Compile Include="FeedModuleJson.cs" />
     <Compile Include="FeedModuleXml.cs" />
     <Compile Include="Modules\BloggerFeedModule.cs" />
+    <Compile Include="Modules\GitHubFeedModule.cs" />
     <Compile Include="Modules\DeviantArtFeedModule.cs" />
     <Compile Include="Modules\FlickrFeedModule.cs" />
     <Compile Include="Modules\InstagramFeedModule.cs" />

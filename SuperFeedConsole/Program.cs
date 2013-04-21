@@ -17,6 +17,7 @@ namespace SuperFeedConsole
             FeedCoordinator.StartFeedModule(new BloggerFeedModule(20, "codersblock"));
             FeedCoordinator.StartFeedModule(new FlickrFeedModule(20, "44589846@N00", "lonekorean"));
             FeedCoordinator.StartFeedModule(new DeviantArtFeedModule(20, "lonekorean"));
+            FeedCoordinator.StartFeedModule(new GitHubFeedModule(30, "lonekorean"));
 
             // the following module is commented out because it requires a private token
             //FeedCoordinator.StartFeedModule(new InstagramFeedModule(20, "<token goes here>"));
