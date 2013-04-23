@@ -65,21 +65,21 @@ namespace CodersBlock.SuperFeed.Modules
             return items;
         }
 
-        protected string GetImageThumbnailUri(string href)
-        {
-            return href.Replace("_b.", "_t.");
-        }
-
-        protected string GetImagePreviewUri(string href)
-        {
-            return href.Replace("_b.", "_z.");
-        }
-
         protected override string GetSnippet(string content)
         {
             content = base.GetSnippet(content);
             content = Regex.Replace(content, @"^" + _username + " posted a photo: ?", "");
             return content;
+        }
+
+        private string GetImageThumbnailUri(string href)
+        {
+            return href.Replace("_b.", "_t.");
+        }
+
+        private string GetImagePreviewUri(string href)
+        {
+            return href.Replace("_b.", "_z.");
         }
     }
 }

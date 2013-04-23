@@ -48,6 +48,16 @@ namespace CodersBlock.SuperFeed.Modules
             return items;
         }
 
+        protected override string GetSnippet(string title)
+        {
+            // disregard all that stuff in base class's GetSnippet()
+            title = Regex.Replace(title, @"^" + _username + ": ", "");
+            title = Regex.Replace(title, @"https?://\w+\.\w+/\w+", "<a href=\"$0\" target=\"_blank\">$0</a>");
+            title = Regex.Replace(title, @"@(\w+)", "<a href=\"http://twitter.com/$1\" target=\"_blank\">$0</a>");
+            title = Regex.Replace(title, @"#(\w+)", "<a href=\"http://twitter.com/search?q=%23$1\" target=\"_blank\">$0</a>");
+            return title;
+        }
+
         private DateTime GetPublished(string pubDate)
         {
             return DateTime.ParseExact(pubDate, "ddd MMM dd HH:mm:ss zzzz yyyy", CultureInfo.InvariantCulture);
@@ -61,16 +71,6 @@ namespace CodersBlock.SuperFeed.Modules
             }
             source = "Via " + Regex.Replace(source, "<.+?>", "");
             return source;
-        }
-
-        protected override string GetSnippet(string title)
-        {
-            // disregard all that stuff in base class's GetSnippet()
-            title = Regex.Replace(title, @"^" + _username + ": ", "");
-            title = Regex.Replace(title, @"https?://\w+\.\w+/\w+", "<a href=\"$0\" target=\"_blank\">$0</a>");
-            title = Regex.Replace(title, @"@(\w+)", "<a href=\"http://twitter.com/$1\" target=\"_blank\">$0</a>");
-            title = Regex.Replace(title, @"#(\w+)", "<a href=\"http://twitter.com/search?q=%23$1\" target=\"_blank\">$0</a>");
-            return title;
         }
     }
 }

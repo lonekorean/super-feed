@@ -40,7 +40,7 @@ namespace CodersBlock.SuperFeed.Modules
                     {
                         SourceName = SourceName,
                         Published = DateTime.Parse(entry.Element(atom + "published").Value),
-                        Title = "Via GitHub",
+                        Title = GetTitle(entry.Element(atom + "id").Value),
                         Snippet = entry.Element(atom + "title").Value,
                         ViewUri = entry.Element(atom + "link").Attribute("href").Value
                     }
@@ -48,6 +48,13 @@ namespace CodersBlock.SuperFeed.Modules
             }
             
             return items;
+        }
+
+        private string GetTitle(string id)
+        {
+            id = Regex.Match(id, @":(\w+)/").Groups[1].Value;   // extract the part we want
+            id = Regex.Replace(id, "([a-z])([A-Z])", "$1 $2");  // turn pascal casing into actual spaces
+            return id;
         }
     }
 }
