@@ -19,11 +19,21 @@ namespace CodersBlock.SuperFeed
         private static readonly object _lockable = new object();
         private static Dictionary<string, List<FeedItem>> _feeds = new Dictionary<string, List<FeedItem>>();
 
+        // properties
+        public static DateTime StartTime { get; private set; }
+
+        // static constructor
+        static FeedCoordinator()
+        {
+            StartTime = DateTime.Now;
+        }
+
         /// <summary>
         /// Kicks off a feed module to run in a loop in its own thread.
         /// </summary>
         public static void StartFeedModule(FeedModule feedModule)
         {
+
             // make sure this feed module isn't already added and started
             if (!_feeds.ContainsKey(feedModule.SourceName))
             {
