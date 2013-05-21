@@ -33,7 +33,6 @@ namespace CodersBlock.SuperFeed
         /// </summary>
         public static void StartFeedModule(FeedModule feedModule)
         {
-
             // make sure this feed module isn't already added and started
             if (!_feeds.ContainsKey(feedModule.SourceName))
             {
@@ -45,7 +44,7 @@ namespace CodersBlock.SuperFeed
                 UpdateFeed(feedModule);
 
                 // start async loop
-                Task.Factory.StartNew(() => RunFeedLoop(feedModule, _feeds.Count * STAGGER_DELAY));
+                Task.Factory.StartNew(() => RunFeedLoop(feedModule, _feeds.Count * STAGGER_DELAY), TaskCreationOptions.LongRunning);
             }
         }
 
