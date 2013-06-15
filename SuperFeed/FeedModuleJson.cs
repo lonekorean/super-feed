@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Web.Script.Serialization;
@@ -11,7 +12,6 @@ namespace CodersBlock.SuperFeed
 
         public override List<FeedItem> GetItems()
         {
-            var client = new WebClient();
             var serializer = new JavaScriptSerializer();
             Dictionary<string, object> doc = null;
             int attempts = 0;
@@ -19,7 +19,9 @@ namespace CodersBlock.SuperFeed
             {
                 try
                 {
-                    var json = client.DownloadString(SourceUri);
+                    var stream = GetRequest().GetResponse().GetResponseStream();
+                    var reader = new StreamReader(stream);
+                    var json = reader.ReadToEnd();
                     doc = serializer.Deserialize<Dictionary<string, object>>(json);
                 }
                 catch
@@ -33,6 +35,7 @@ namespace CodersBlock.SuperFeed
             return ParseDocument(doc);
         }
 
+        protected abstract HttpWebRequest GetRequest();
         protected abstract List<FeedItem> ParseDocument(Dictionary<string, object> doc);
     }
 }

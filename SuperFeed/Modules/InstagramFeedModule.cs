@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Web.Script.Serialization;
 
 namespace CodersBlock.SuperFeed.Modules
@@ -49,6 +51,12 @@ namespace CodersBlock.SuperFeed.Modules
         public InstagramFeedModule(int totalLimit, string token) : base(totalLimit)
         {
             _token = token;
+        }
+
+        protected override HttpWebRequest GetRequest()
+        {
+            var request = (HttpWebRequest)WebRequest.Create(SourceUri);
+            return request;
         }
 
         protected override List<FeedItem> ParseDocument(Dictionary<string, object> doc)
