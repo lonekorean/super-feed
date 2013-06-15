@@ -8,7 +8,6 @@ namespace CodersBlock.SuperFeed.Modules
 {
     public class BloggerFeedModule : FeedModuleXml
     {
-        // variables
         private string _subdomain;
 
         public override string SourceName

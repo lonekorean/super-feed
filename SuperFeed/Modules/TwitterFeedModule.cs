@@ -9,7 +9,6 @@ namespace CodersBlock.SuperFeed.Modules
 {
     public class TwitterFeedModule : FeedModuleXml
     {
-        // variables
         private string _username;
 
         public override string SourceName

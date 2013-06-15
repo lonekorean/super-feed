@@ -2,7 +2,6 @@
 using System.Net;
 using System.Threading;
 using System.Web.Script.Serialization;
-using System.Xml.Linq;
 
 namespace CodersBlock.SuperFeed
 {

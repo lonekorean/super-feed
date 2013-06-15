@@ -9,7 +9,6 @@ namespace CodersBlock.SuperFeed.Modules
 {
     public class GitHubFeedModule : FeedModuleXml
     {
-        // variables
         private string _username;
 
         public override string SourceName

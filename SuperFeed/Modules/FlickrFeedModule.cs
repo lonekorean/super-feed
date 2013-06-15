@@ -8,7 +8,6 @@ namespace CodersBlock.SuperFeed.Modules
 {
     public class FlickrFeedModule : FeedModuleXml
     {
-        // variables
         private string _id;
         private string _username;
 

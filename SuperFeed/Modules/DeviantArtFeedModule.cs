@@ -7,7 +7,6 @@ namespace CodersBlock.SuperFeed.Modules
 {
     public class DeviantArtFeedModule : FeedModuleXml
     {
-        // variables
         private string _username;
 
         public override string SourceName

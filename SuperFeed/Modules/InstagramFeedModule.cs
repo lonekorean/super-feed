@@ -1,12 +1,39 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Web.Script.Serialization;
 
 namespace CodersBlock.SuperFeed.Modules
 {
     public class InstagramFeedModule : FeedModuleJson
     {
-        // variables
+        private class Model
+        {
+            public List<ModelData> data { get; set; }
+        }
+
+        private class ModelData
+        {
+            public string created_time { get; set; }
+            public ModelCaption caption { get; set; }
+            public string link { get; set; }
+            public ModelImages images { get; set; }
+        }
+
+        private class ModelCaption
+        {
+            public string text { get; set; }
+        }
+
+        private class ModelImages
+        {
+            public ModelStandardResolution standard_resolution { get; set; }
+        }
+
+        private class ModelStandardResolution
+        {
+            public string url { get; set; }
+        }
+
         private string _token;
 
         public override string SourceName
@@ -29,24 +56,24 @@ namespace CodersBlock.SuperFeed.Modules
             var items = new List<FeedItem>(_totalLimit);
             if (doc != null)
             {
-                var shots = (ArrayList)doc["data"];
-                for (var i = 0; i < Math.Min(_totalLimit, doc.Count); i++)
+                var serializer = new JavaScriptSerializer();
+                var model = serializer.ConvertToType<Model>(doc);
+                for (var i = 0; i < Math.Min(_totalLimit, model.data.Count); i++)
                 {
-                    var shot = (Dictionary<string, object>)shots[i];
+                    var data = model.data[i];
                     items.Add(new FeedItem()
                     {
-                        // TODO: this code is not fun, make it better
                         SourceName = SourceName,
-                        Published = GetPublished((string)shot["created_time"]),
+                        Published = GetPublished(data.created_time),
                         Title = "Via Instagram",
-                        Snippet = (string)((Dictionary<string, object>)shot["caption"])["text"],
-                        ImageThumbnailUri = (string)shot["link"],
-                        ImagePreviewUri = (string)((Dictionary<string, object>)((Dictionary<string, object>)shot["images"])["standard_resolution"])["url"],
-                        ViewUri = (string)shot["link"]
+                        Snippet = data.caption.text,
+                        ImageThumbnailUri = data.link,
+                        ImagePreviewUri = data.images.standard_resolution.url,
+                        ViewUri = data.link
                     });
                 }
             }
-            
+
             return items;
         }
 
