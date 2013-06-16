@@ -40,7 +40,7 @@ namespace CodersBlock.SuperFeed.Modules
 
         public override string SourceUri
         {
-            get { return string.Format("https://api.twitter.com/1/statuses/user_timeline.xml?screen_name={0}&include_rts=1&count={1}", _username, _totalLimit); }
+            get { return "https://api.twitter.com/1.1/statuses/user_timeline.json"; }
         }
 
         public TwitterFeedModule(int totalLimit, string consumerKey, string consumerSecret, string accessToken, string accessTokenSecret, string username) : base(totalLimit)
@@ -54,67 +54,39 @@ namespace CodersBlock.SuperFeed.Modules
 
         protected override HttpWebRequest GetRequest()
         {
-            // oauth implementation details
-            var oauth_version = "1.0";
-            var oauth_signature_method = "HMAC-SHA1";
-
-            // unique request details
-            var oauth_nonce = Convert.ToBase64String(new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString()));
+            var oauthVersion = "1.0";
+            var oauthSignatureMethod = "HMAC-SHA1";
+            var oauthNonce = Convert.ToBase64String(new ASCIIEncoding().GetBytes(DateTime.Now.Ticks.ToString()));
             var timeSpan = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            var oauth_timestamp = Convert.ToInt64(timeSpan.TotalSeconds).ToString();
+            var oauthTimestamp = Convert.ToInt64(timeSpan.TotalSeconds).ToString();
 
-            // message api details
-            var resource_url = "https://api.twitter.com/1.1/statuses/user_timeline.json";
-            var screen_name = _username;
-            // create oauth signature
-            var baseFormat = "oauth_consumer_key={0}&oauth_nonce={1}&oauth_signature_method={2}&oauth_timestamp={3}&oauth_token={4}&oauth_version={5}&screen_name={6}";
+            var baseString = "GET&" + Uri.EscapeDataString(SourceUri) + "&" +
+                Uri.EscapeDataString(
+                    string.Format(
+                        // must be alphabetical
+                        // non-OAuth stuff must also be added to requestQuery
+                        "count={0}&oauth_consumer_key={1}&oauth_nonce={2}&oauth_signature_method={3}&oauth_timestamp={4}&oauth_token={5}&oauth_version={6}&screen_name={7}&trim_user=true",
+                        _totalLimit, _consumerKey, oauthNonce, oauthSignatureMethod, oauthTimestamp, _accessToken, oauthVersion, Uri.EscapeDataString(_username)
+                    )
+                );
 
-            var baseString = string.Format(baseFormat,
-                                        _consumerKey,
-                                        oauth_nonce,
-                                        oauth_signature_method,
-                                        oauth_timestamp,
-                                        _accessToken,
-                                        oauth_version,
-                                         Uri.EscapeDataString(screen_name)
-                                        );
-
-            baseString = string.Concat("GET&", Uri.EscapeDataString(resource_url), "&", Uri.EscapeDataString(baseString));
-
-            var compositeKey = string.Concat(Uri.EscapeDataString(_consumerSecret),
-                                    "&", Uri.EscapeDataString(_accessTokenSecret));
-
+            var compositeKey = _consumerSecret + "&" + _accessTokenSecret;
             string oauth_signature;
             using (HMACSHA1 hasher = new HMACSHA1(ASCIIEncoding.ASCII.GetBytes(compositeKey)))
             {
-                oauth_signature = Convert.ToBase64String(
-                    hasher.ComputeHash(ASCIIEncoding.ASCII.GetBytes(baseString)));
+                oauth_signature = Convert.ToBase64String(hasher.ComputeHash(ASCIIEncoding.ASCII.GetBytes(baseString)));
             }
 
-            // create the request header
-            var headerFormat = "OAuth oauth_nonce=\"{0}\", oauth_signature_method=\"{1}\", " +
-                               "oauth_timestamp=\"{2}\", oauth_consumer_key=\"{3}\", " +
-                               "oauth_token=\"{4}\", oauth_signature=\"{5}\", " +
-                               "oauth_version=\"{6}\"";
+            var authHeader = string.Format(
+                "OAuth oauth_nonce=\"{0}\", oauth_signature_method=\"{1}\", oauth_timestamp=\"{2}\", oauth_consumer_key=\"{3}\", oauth_token=\"{4}\", oauth_signature=\"{5}\", oauth_version=\"{6}\"",
+                oauthNonce, oauthSignatureMethod, oauthTimestamp, _consumerKey, _accessToken, Uri.EscapeDataString(oauth_signature), oauthVersion
+            );
 
-            var authHeader = string.Format(headerFormat,
-                                    Uri.EscapeDataString(oauth_nonce),
-                                    Uri.EscapeDataString(oauth_signature_method),
-                                    Uri.EscapeDataString(oauth_timestamp),
-                                    Uri.EscapeDataString(_consumerKey),
-                                    Uri.EscapeDataString(_accessToken),
-                                    Uri.EscapeDataString(oauth_signature),
-                                    Uri.EscapeDataString(oauth_version)
-                            );
+            var requestQuery = string.Format("count={0}&screen_name={1}&trim_user=true",
+                _totalLimit, Uri.EscapeDataString(_username)
+            );
 
-
-            // make the request
-
-            ServicePointManager.Expect100Continue = false;
-
-            var postBody = "screen_name=" + Uri.EscapeDataString(screen_name);
-            resource_url += "?" + postBody;
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(resource_url);
+            var request = (HttpWebRequest)WebRequest.Create(SourceUri + "?" + requestQuery);
             request.Headers.Add("Authorization", authHeader);
             request.Method = "GET";
             request.ContentType = "application/x-www-form-urlencoded";
