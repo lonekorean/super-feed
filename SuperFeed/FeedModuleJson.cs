@@ -22,6 +22,7 @@ namespace CodersBlock.SuperFeed
                     var stream = GetRequest().GetResponse().GetResponseStream();
                     var reader = new StreamReader(stream);
                     var json = reader.ReadToEnd();
+                    json = "{root:" + json + "}"; // ensures JSON can always be deserialized into a dictionary
                     doc = serializer.Deserialize<Dictionary<string, object>>(json);
                 }
                 catch

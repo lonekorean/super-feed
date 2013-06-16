@@ -10,6 +10,11 @@ namespace CodersBlock.SuperFeed.Modules
     {
         private class Model
         {
+            public ModelRoot root { get; set; }
+        }
+
+        private class ModelRoot
+        {
             public List<ModelData> data { get; set; }
         }
 
@@ -61,28 +66,28 @@ namespace CodersBlock.SuperFeed.Modules
 
         protected override List<FeedItem> ParseDocument(Dictionary<string, object> doc)
         {
-            var items = new List<FeedItem>(_totalLimit);
+            var feedItems = new List<FeedItem>(_totalLimit);
             if (doc != null)
             {
                 var serializer = new JavaScriptSerializer();
                 var model = serializer.ConvertToType<Model>(doc);
-                for (var i = 0; i < Math.Min(_totalLimit, model.data.Count); i++)
+                for (var i = 0; i < Math.Min(_totalLimit, model.root.data.Count); i++)
                 {
-                    var data = model.data[i];
-                    items.Add(new FeedItem()
+                    var modelItem = model.root.data[i];
+                    feedItems.Add(new FeedItem()
                     {
                         SourceName = SourceName,
-                        Published = GetPublished(data.created_time),
+                        Published = GetPublished(modelItem.created_time),
                         Title = "Via Instagram",
-                        Snippet = data.caption.text,
-                        ImageThumbnailUri = data.link,
-                        ImagePreviewUri = data.images.standard_resolution.url,
-                        ViewUri = data.link
+                        Snippet = modelItem.caption.text,
+                        ImageThumbnailUri = modelItem.link,
+                        ImagePreviewUri = modelItem.images.standard_resolution.url,
+                        ViewUri = modelItem.link
                     });
                 }
             }
 
-            return items;
+            return feedItems;
         }
 
         private DateTime GetPublished(string pubDate)
