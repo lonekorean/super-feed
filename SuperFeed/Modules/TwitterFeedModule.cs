@@ -104,12 +104,11 @@ namespace CodersBlock.SuperFeed.Modules
                 for (var i = 0; i < Math.Min(_totalLimit, model.root.Count); i++)
                 {
                     var modelItem = model.root[i];
-                    feedItems.Add(new FeedItem()
+                    feedItems.Add(new FeedItem(this)
                     {
-                        SourceName = SourceName,
                         Published = GetPublished(modelItem.created_at),
                         Title = GetTitle(modelItem.source),
-                        Snippet = modelItem.text,
+                        Snippet = GetSnippet(modelItem.text),
                         ViewUri = GetViewUri(modelItem.id)
                     });
                 }
@@ -118,14 +117,14 @@ namespace CodersBlock.SuperFeed.Modules
             return feedItems;
         }
 
-        protected override string GetSnippet(string title)
+        protected override string GetSnippet(string text)
         {
             // disregard all that stuff in base class's GetSnippet()
-            title = Regex.Replace(title, @"^" + _username + ": ", "");
-            title = Regex.Replace(title, @"https?://\w+\.\w+/\w+", "<a href=\"$0\" target=\"_blank\">$0</a>");
-            title = Regex.Replace(title, @"@(\w+)", "<a href=\"http://twitter.com/$1\" target=\"_blank\">$0</a>");
-            title = Regex.Replace(title, @"#(\w+)", "<a href=\"http://twitter.com/search?q=%23$1\" target=\"_blank\">$0</a>");
-            return title;
+            text = Regex.Replace(text, @"^" + _username + ": ", "");
+            text = Regex.Replace(text, @"https?://\w+\.\w+/\w+", "<a href=\"$0\" target=\"_blank\">$0</a>");
+            text = Regex.Replace(text, @"@(\w+)", "<a href=\"http://twitter.com/$1\" target=\"_blank\">$0</a>");
+            text = Regex.Replace(text, @"#(\w+)", "<a href=\"http://twitter.com/search?q=%23$1\" target=\"_blank\">$0</a>");
+            return text;
         }
 
         private DateTime GetPublished(string pubDate)

@@ -25,7 +25,8 @@ namespace SuperFeedConsole
             while (true)
             {
                 Console.Clear();
-                var list = FeedCoordinator.GetMergedAndBalancedFeed();
+                //var list = FeedCoordinator.GetMergedAndBalancedFeed();
+                var list = FeedCoordinator.GetTopFeed();
                 for (var i = 0; i < list.Count; i++)
                 {
                     var item = list[i];

@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace CodersBlock.SuperFeed
 {
     public static class FeedCoordinator
     {
         // constants
-        private const int STAGGER_DELAY = 10000; // 10 seconds
-        private const int INTERVAL_DELAY = 900000; // 15 minutes
-        private const int CONSECUTIVE_LIMIT = 2;
-        private const int MAX_FINAL_ITEMS = 20;
-
+        private const int STAGGER_DELAY = 10000;            // stagger time between initial API calls to sources (in ms)
+        private const int INTERVAL_DELAY = 900000;          // pause between repeating API calls to same source (in ms)
+        private const int MAX_PER_SOURCE = 20;              // max items returned from GetFeed()
+        private const int MAX_ALL_SOURCES = 20;             // max items returned from GetTopFeed()
+        private const int PROMOTE_DIVERSITY = 2;            // helps GetTopFeed() include items from all sources
+        private const int PROMOTE_CONSECUTIVE_LIMIT = 2;    // helps GetTopFeed() limit consecutive items from the same source
+        private const int PROMOTE_SOMEWHAT_RECENT = 365;    // helps GetTopFeed() include somewhat recent items (in days)
+        private const int PROMOTE_VERY_RECENT = 7;          // helps GetTopFeed() include the freshest items (in days)
+        
         // variables
         private static readonly object _lockable = new object();
         private static Dictionary<string, List<FeedItem>> _feeds = new Dictionary<string, List<FeedItem>>();
@@ -49,7 +52,7 @@ namespace CodersBlock.SuperFeed
         }
 
         /// <summary>
-        /// Get list of feed items from a particular source.
+        /// Get feed items from a single source.
         /// </summary>
         public static List<FeedItem> GetFeed(string sourceName)
         {
@@ -58,37 +61,49 @@ namespace CodersBlock.SuperFeed
             {
                 feed = new List<FeedItem>(_feeds[sourceName]);
             }
-            return feed;
+            return feed.GetRange(0, Math.Min(feed.Count, MAX_PER_SOURCE));
         }
 
         /// <summary>
-        /// Get list of feed items from all sources merged together, sorted by published date.
+        /// Get feed items from all sources merged together.
         /// </summary>
         public static List<FeedItem> GetMergedFeed()
         {
-            var feed = new List<FeedItem>();
+            var mergedFeed = new List<FeedItem>();
             foreach (var source in _feeds.Keys)
             {
-                feed.AddRange(GetFeed(source));
+                mergedFeed.AddRange(GetFeed(source));
             }
 
             // sort by published date descending
-            feed.Sort((a, b) => b.Published.CompareTo(a.Published));
+            mergedFeed.Sort((a, b) => b.Published.CompareTo(a.Published));
 
-            return feed;
+            return mergedFeed;
         }
-
+        
         /// <summary>
-        /// Returns a merged feed, but additionally processed to limit consecutive items from the same source.
+        /// Get feed items from all sources merged together, with weighting applied.
         /// </summary>
-        /// <returns></returns>
-        public static List<FeedItem> GetMergedAndBalancedFeed()
+        public static List<FeedItem> GetTopFeed()
         {
             var mergedFeed = GetMergedFeed();
-            var balancedFeed = new List<FeedItem>();
 
-            string mostRecentSourceName = "";
-            int consecutiveCount = 0;
+            // promote diversity
+            foreach (var feed in _feeds.Values)
+            {
+                foreach (var feedItem in feed.GetRange(0, Math.Min(feed.Count, PROMOTE_DIVERSITY)))
+                {
+                    var mergedFeedItem = mergedFeed.First(i => i.ViewUri == feedItem.ViewUri);
+                    if(mergedFeedItem != null)
+                    {
+                        mergedFeedItem.Weight++;
+                    }
+                }
+            }
+
+            // promote consecutive limit
+            var mostRecentSourceName = "";
+            var consecutiveCount = 0;
             foreach (var feedItem in mergedFeed)
             {
                 if (feedItem.SourceName != mostRecentSourceName)
@@ -96,14 +111,26 @@ namespace CodersBlock.SuperFeed
                     consecutiveCount = 0;
                     mostRecentSourceName = feedItem.SourceName;
                 }
-
-                if (++consecutiveCount <= CONSECUTIVE_LIMIT)
+                if (++consecutiveCount <= PROMOTE_CONSECUTIVE_LIMIT)
                 {
-                    balancedFeed.Add(feedItem);
+                    feedItem.Weight++;
                 }
             }
 
-            return balancedFeed.GetRange(0, Math.Min(balancedFeed.Count, MAX_FINAL_ITEMS));
+            // promote somewhat recent
+            var somewhatCutOff = DateTime.Now.AddDays(-PROMOTE_SOMEWHAT_RECENT);
+            mergedFeed.Where(x => x.Published >= somewhatCutOff).ToList().ForEach(x => x.Weight++);
+
+            // promote very recent
+            var veryCutOff = DateTime.Now.AddDays(-PROMOTE_VERY_RECENT);
+            mergedFeed.Where(x => x.Published >= somewhatCutOff).ToList().ForEach(x => x.Weight++);
+
+            // sort by weight, take the top, resort by published
+            mergedFeed.Sort((a, b) => b.CompareTo(a));
+            mergedFeed = mergedFeed.Take(Math.Min(mergedFeed.Count, MAX_ALL_SOURCES)).ToList();
+            mergedFeed.Sort((a, b) => b.Published.CompareTo(a.Published));
+
+            return mergedFeed;
         }
 
         /// <summary>

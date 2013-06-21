@@ -35,9 +35,8 @@ namespace CodersBlock.SuperFeed.Modules
 
                 items = (
                     from entry in doc.Descendants(atom + "entry")
-                    select new FeedItem
+                    select new FeedItem(this)
                     {
-                        SourceName = SourceName,
                         Published = DateTime.Parse(entry.Element(atom + "published").Value),
                         Title = GetTitle(entry.Element(atom + "id").Value),
                         Snippet = entry.Element(atom + "title").Value,

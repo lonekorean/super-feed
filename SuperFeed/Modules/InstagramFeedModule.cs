@@ -74,9 +74,8 @@ namespace CodersBlock.SuperFeed.Modules
                 for (var i = 0; i < Math.Min(_totalLimit, model.root.data.Count); i++)
                 {
                     var modelItem = model.root.data[i];
-                    feedItems.Add(new FeedItem()
+                    feedItems.Add(new FeedItem(this)
                     {
-                        SourceName = SourceName,
                         Published = GetPublished(modelItem.created_time),
                         Title = "Via Instagram",
                         Snippet = modelItem.caption.text,
