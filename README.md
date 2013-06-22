@@ -13,11 +13,11 @@ SuperFeed also takes care of various details for you, such as staggered API requ
 
 Feeds are added and kicked off by passing a `FeedModule` instance into `FeedCoordinator.StartFeedModule()`, like this:
 
-    FeedCoordinator.StartFeedModule(new TwitterFeedModule(80, "lonekorean"));
+    FeedCoordinator.StartFeedModule(new BloggerFeedModule(20, "codersblock"));
 
 If you are using SuperFeed in a web app, then the `Application_Start()` method of your `Global.asax.cs` is a good place for this.
 
-After that, you can retrieve your super feed by calling either `GetMergedFeed()` or `GetMergedAndBalancedFeed()`. The former gives you all your feeds merged together. The latter takes this one step further by "balancing" your super feed to curb the number of consecutive `FeedItems` from any single social media site. This is useful if, for example, you have many more tweets than anything else, but don't want your super feed to be dominated by tweets.
+After that, you can retrieve your super feed by calling `GetTopFeed()`. This takes all of your feeds, merges them together, thins things out by applying a weighting algorithm, and gives you the resulting list. The weighting algorithm does a couple of things behind the scenes, but the main goal is to favor diversity and freshness of `FeedItems`.
 
 Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github.com/lonekorean/super-feed/blob/master/SuperFeedConsole/Program.cs
 
@@ -32,10 +32,12 @@ SuperFeed currently supports six social media sites:
 - GitHub
 - Instagram
 
-The Flickr `FeedModule` requires your Flickr ID, which you can get here: http://idgettr.com/
+The Flickr `FeedModule` requires your Flickr ID. You can get this here: http://idgettr.com/.
 
-The Instagram `FeedModule` requires a private token, which you can obtain with help from this page: http://www.blueprintinteractive.com/blog/how-instagram-api-fancybox-simplified
+The Instagram `FeedModule` requires a private token. Go to the Instagram developer site: http://instagram.com/developer/. Register your app, then go to the API console: http://instagram.com/developer/api-console/. Change the Authentication dropdown to OAuth 2, allow access, then fire off any request in the console (doesn't matter if it fails). The private token will be displayed in the Request panel.
+
+The Twitter `FeedModule` requires all kinds of stuff. Go to the Twitter dev site: https://dev.twitter.com/. Sign into your account, create a new app. At the bottom of the details page for your new app, you should see a button to quickly generate an access token for yourself. Do that. Now the details page should provide everything you need: consumer key, consumer secret, access token, access token secret.
 
 ###Example
 
-You can see SuperFeed in action on my website: http://codersblock.com/
+You can see SuperFeed in action on my website: http://codersblock.com/.
