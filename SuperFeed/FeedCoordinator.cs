@@ -8,13 +8,15 @@ namespace CodersBlock.SuperFeed
 {
     public static class FeedCoordinator
     {
+        // TODO: yeah, sorry for the iffy comments, some of these are hard to explain
         // constants
         private const int STAGGER_DELAY = 10000;            // stagger time between initial API calls to sources (in ms)
         private const int INTERVAL_DELAY = 900000;          // pause between repeating API calls to same source (in ms)
-        private const int MAX_PER_SOURCE = 20;              // max items returned from GetFeed()
+        private const int MAX_PER_SOURCE = 40;              // max items returned from GetFeed()
         private const int MAX_ALL_SOURCES = 20;             // max items returned from GetTopFeed()
         private const int PROMOTE_DIVERSITY = 2;            // helps GetTopFeed() include items from all sources
-        private const int PROMOTE_CONSECUTIVE_LIMIT = 2;    // helps GetTopFeed() limit consecutive items from the same source
+        private const int PROMOTE_CONSECUTIVE_LIMIT = 3;    // helps GetTopFeed() limit consecutive items from the same source
+        private const int PROMOTE_CONSECUTIVE_MEMORY = 2;   // helps GetTopFeed() rotate through more sources
         private const int PROMOTE_SOMEWHAT_RECENT = 365;    // helps GetTopFeed() include somewhat recent items (in days)
         private const int PROMOTE_VERY_RECENT = 7;          // helps GetTopFeed() include the freshest items (in days)
         
@@ -101,15 +103,19 @@ namespace CodersBlock.SuperFeed
                 }
             }
 
-            // promote consecutive limit
-            var mostRecentSourceName = "";
+            // promote consecutive limit and memory
             var consecutiveCount = 0;
+            var mostRecentSourceNames = new Queue<string>(PROMOTE_CONSECUTIVE_MEMORY);
             foreach (var feedItem in mergedFeed)
             {
-                if (feedItem.SourceName != mostRecentSourceName)
+                if (!mostRecentSourceNames.Contains(feedItem.SourceName))
                 {
                     consecutiveCount = 0;
-                    mostRecentSourceName = feedItem.SourceName;
+                    mostRecentSourceNames.Enqueue(feedItem.SourceName);
+                    if (mostRecentSourceNames.Count > PROMOTE_CONSECUTIVE_MEMORY)
+                    {
+                        mostRecentSourceNames.Dequeue();
+                    }
                 }
                 if (++consecutiveCount <= PROMOTE_CONSECUTIVE_LIMIT)
                 {
