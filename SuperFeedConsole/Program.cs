@@ -25,12 +25,12 @@ namespace SuperFeedConsole
             while (true)
             {
                 Console.Clear();
-                //var list = FeedCoordinator.GetMergedAndBalancedFeed();
                 var list = FeedCoordinator.GetTopFeed();
                 for (var i = 0; i < list.Count; i++)
                 {
                     var item = list[i];
                     Console.WriteLine("Item #" + (i + 1));
+                    Console.WriteLine(GetDisplayLine("Weight", item.Weight.ToString()));
                     Console.WriteLine(GetDisplayLine("SourceName", item.SourceName));
                     Console.WriteLine(GetDisplayLine("Published", item.Published.ToString()));
                     Console.WriteLine(GetDisplayLine("Title", item.Title));

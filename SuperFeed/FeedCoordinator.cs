@@ -61,9 +61,13 @@ namespace CodersBlock.SuperFeed
             List<FeedItem> feed;
             lock (_lockable)
             {
-                feed = new List<FeedItem>(_feeds[sourceName]);
+                feed = _feeds[sourceName];
             }
-            return feed.GetRange(0, Math.Min(feed.Count, MAX_PER_SOURCE));
+
+            feed = feed.GetRange(0, Math.Min(feed.Count, MAX_PER_SOURCE));
+
+            // return a cloned list
+            return feed.Select(x => x.Clone()).ToList();
         }
 
         /// <summary>

@@ -2,14 +2,10 @@
 
 namespace CodersBlock.SuperFeed
 {
-    public class FeedItem
+    [Serializable]
+    public class FeedItem : IComparable<FeedItem>
     {
-        // TODO: plan to do more with this FeedModule reference in the future
-        private FeedModule Source { get; set; }
-        public string SourceName {
-            get { return Source.SourceName; }
-        }
-
+        public string SourceName { get; set; }
         public DateTime Published { get; set; }
         public string Title { get; set; }
         public string Snippet { get; set; }
@@ -20,9 +16,30 @@ namespace CodersBlock.SuperFeed
 
         public FeedItem(FeedModule source)
         {
-            Source = source;
+            SourceName = source.SourceName;
         }
 
+        private FeedItem()
+        {
+            // for cloning
+        }
+
+        public FeedItem Clone()
+        {
+            var clone = new FeedItem()
+            {
+                SourceName = this.SourceName,
+                Published = this.Published,
+                Title = this.Title,
+                Snippet = this.Snippet,
+                ImageThumbnailUri = this.ImageThumbnailUri,
+                ImagePreviewUri = this.ImagePreviewUri,
+                ViewUri = this.ViewUri,
+                Weight = this.Weight
+            };
+            return clone;
+        }
+        
         public int CompareTo(FeedItem otherFeedItem)
         {
             if(this.Weight != otherFeedItem.Weight)
