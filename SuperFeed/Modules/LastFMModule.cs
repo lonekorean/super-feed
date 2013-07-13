@@ -4,12 +4,6 @@ using System.Linq;
 using System.Xml.Linq;
 
 namespace CodersBlock.SuperFeed.Modules {
-    public enum LastFMFeedType {
-        RecentTracks,
-        LovedTracks
-    }
-   
-
     public class LastFMFeedModule : FeedModuleXml {
         private string _username;
         private string _apiKey;
