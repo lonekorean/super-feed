@@ -12,7 +12,7 @@ namespace SuperFeedConsole
         static void Main(string[] args)
         {
             Console.WriteLine("Starting feed modules...");
-
+            FeedCoordinator.StartFeedModule(new LastFMFeedModule(50, "25121b1fa3ed5de846be9573da41d858", "lonekorean"));
             FeedCoordinator.StartFeedModule(new BloggerFeedModule(20, "codersblock"));
             FeedCoordinator.StartFeedModule(new FlickrFeedModule(20, "44589846@N00", "lonekorean"));
             FeedCoordinator.StartFeedModule(new DeviantArtFeedModule(20, "lonekorean"));
