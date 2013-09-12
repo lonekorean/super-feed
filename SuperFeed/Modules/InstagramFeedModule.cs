@@ -79,7 +79,6 @@ namespace CodersBlock.SuperFeed.Modules
                         Published = GetPublished(modelItem.created_time),
                         Title = "Via Instagram",
                         Snippet = modelItem.caption.text,
-                        ImageThumbnailUri = modelItem.link,
                         ImagePreviewUri = modelItem.images.standard_resolution.url,
                         ViewUri = modelItem.link
                     });

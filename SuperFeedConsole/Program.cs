@@ -35,7 +35,6 @@ namespace SuperFeedConsole
                     Console.WriteLine(GetDisplayLine("Published", item.Published.ToString()));
                     Console.WriteLine(GetDisplayLine("Title", item.Title));
                     Console.WriteLine(GetDisplayLine("Snippet", item.Snippet));
-                    Console.WriteLine(GetDisplayLine("ImageThumbnailUri", item.ImageThumbnailUri));
                     Console.WriteLine(GetDisplayLine("ImagePreviewUri", item.ImagePreviewUri));
                     Console.WriteLine(GetDisplayLine("ViewUri", item.ViewUri));
                     Console.WriteLine();

@@ -38,11 +38,6 @@ namespace CodersBlock.SuperFeed.Modules
                         Published = GetPublished(item.Element("pubDate").Value),
                         Title = item.Element("title").Value,
                         Snippet = GetSnippet(item.Element(mrss + "description").Value),
-                        ImageThumbnailUri = (
-                            from thumbnail in item.Elements(mrss + "thumbnail")
-                            where thumbnail.Attribute("width").Value == "150"
-                            select thumbnail.Attribute("url").Value
-                        ).Single(),
                         ImagePreviewUri = (
                             from content in item.Elements(mrss + "content")
                             where content.Attribute("medium").Value == "image"

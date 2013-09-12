@@ -41,11 +41,6 @@ namespace CodersBlock.SuperFeed.Modules
                         Published = DateTime.Parse(entry.Element(atom + "published").Value),
                         Title = entry.Element(atom + "title").Value,
                         Snippet = GetSnippet(entry.Element(atom + "content").Value),
-                        ImageThumbnailUri = GetImageThumbnailUri((
-                            from link in entry.Elements(atom + "link")
-                            where link.Attribute("rel").Value == "enclosure"
-                            select link.Attribute("href").Value
-                        ).Single()),
                         ImagePreviewUri = GetImagePreviewUri((
                             from link in entry.Elements(atom + "link")
                             where link.Attribute("rel").Value == "enclosure"

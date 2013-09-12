@@ -37,11 +37,6 @@ namespace CodersBlock.SuperFeed.Modules {
                             where image.Attribute("size").Value == "large"
                             select image.Value
                         ).Single(),
-                        ImageThumbnailUri = (
-                            from image in track.Elements("image")
-                            where image.Attribute("size").Value == "medium"
-                            select image.Value
-                        ).Single(),
                         ViewUri = track.Element("url").Value
                     }
                 ).Take(_totalLimit).ToList<FeedItem>();

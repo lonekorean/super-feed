@@ -14,9 +14,9 @@ namespace CodersBlock.SuperFeed
         private const int INTERVAL_DELAY = 900000;          // pause between repeating API calls to same source (in ms)
         private const int MAX_PER_SOURCE = 40;              // max items returned from GetFeed()
         private const int MAX_ALL_SOURCES = 20;             // max items returned from GetTopFeed()
-        private const int PROMOTE_DIVERSITY = 2;            // helps GetTopFeed() include items from all sources
-        private const int PROMOTE_CONSECUTIVE_LIMIT = 3;    // helps GetTopFeed() limit consecutive items from the same source
-        private const int PROMOTE_CONSECUTIVE_MEMORY = 2;   // helps GetTopFeed() rotate through more sources
+        private const int PROMOTE_REPRESENTATION = 2;       // helps GetTopFeed() include items from all sources
+        private const int PROMOTE_STREAK_LIMIT = 3;         // helps GetTopFeed() limit consecutive items from the same source
+        private const int PROMOTE_ROTATION = 2;             // helps GetTopFeed() rotate through more sources
         private const int PROMOTE_SOMEWHAT_RECENT = 365;    // helps GetTopFeed() include somewhat recent items (in days)
         private const int PROMOTE_VERY_RECENT = 7;          // helps GetTopFeed() include the freshest items (in days)
         
@@ -94,10 +94,10 @@ namespace CodersBlock.SuperFeed
         {
             var mergedFeed = GetMergedFeed();
 
-            // promote diversity
+            // promote representation
             foreach (var feed in _feeds.Values)
             {
-                foreach (var feedItem in feed.GetRange(0, Math.Min(feed.Count, PROMOTE_DIVERSITY)))
+                foreach (var feedItem in feed.GetRange(0, Math.Min(feed.Count, PROMOTE_REPRESENTATION)))
                 {
                     var mergedFeedItem = mergedFeed.First(i => i.ViewUri == feedItem.ViewUri);
                     if(mergedFeedItem != null)
@@ -107,21 +107,21 @@ namespace CodersBlock.SuperFeed
                 }
             }
 
-            // promote consecutive limit and memory
-            var consecutiveCount = 0;
-            var mostRecentSourceNames = new Queue<string>(PROMOTE_CONSECUTIVE_MEMORY);
+            // promote streak limit and rotation
+            var streakCount = 0;
+            var mostRecentSourceNames = new Queue<string>(PROMOTE_ROTATION);
             foreach (var feedItem in mergedFeed)
             {
                 if (!mostRecentSourceNames.Contains(feedItem.SourceName))
                 {
-                    consecutiveCount = 0;
                     mostRecentSourceNames.Enqueue(feedItem.SourceName);
-                    if (mostRecentSourceNames.Count > PROMOTE_CONSECUTIVE_MEMORY)
+                    if (mostRecentSourceNames.Count > PROMOTE_ROTATION)
                     {
                         mostRecentSourceNames.Dequeue();
+                        streakCount = 0;
                     }
                 }
-                if (++consecutiveCount <= PROMOTE_CONSECUTIVE_LIMIT)
+                if (++streakCount <= PROMOTE_STREAK_LIMIT)
                 {
                     feedItem.Weight++;
                 }
