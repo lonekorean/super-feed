@@ -37,7 +37,7 @@ namespace CodersBlock.SuperFeed.Modules
                     {
                         Published = GetPublished(item.Element("pubDate").Value),
                         Title = item.Element("title").Value,
-                        Snippet = GetSnippet(item.Element(mrss + "description").Value),
+                        Snippet = item.Element(mrss + "description").Value,
                         ImagePreviewUri = (
                             from content in item.Elements(mrss + "content")
                             where content.Attribute("medium").Value == "image"

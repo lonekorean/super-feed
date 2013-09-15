@@ -58,16 +58,13 @@ namespace CodersBlock.SuperFeed.Modules
             return items;
         }
 
-        protected override string GetSnippet(string content)
+        private string GetSnippet(string content)
         {
-            content = base.GetSnippet(content);
-            content = Regex.Replace(content, @"^" + _username + " posted a photo: ?", "");
+            content = Regex.Replace(content, @"<.+?>", " ");
+            content = Regex.Replace(content, @"\s+", " ");
+            content = Regex.Replace(content, _username + " posted a photo:", "");
+            content = content.Trim();
             return content;
-        }
-
-        private string GetImageThumbnailUri(string href)
-        {
-            return href.Replace("_b.", "_t.");
         }
 
         private string GetImagePreviewUri(string href)

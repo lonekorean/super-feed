@@ -51,10 +51,17 @@ namespace CodersBlock.SuperFeed.Modules
             return items;
         }
 
-        protected override string GetSnippet(string content)
+        private string GetSnippet(string content)
         {
-            content = Regex.Replace(content, @"(^|<br />)<b>.+?</b><br />", "");
-            content = base.GetSnippet(content);
+            content = Regex.Replace(content, @"<.+?>", " ");            // remove tags
+            content = Regex.Replace(content, @"\s+", " ");              // consolidate whitespace
+            content = content.Trim();                                   // trim whitespace
+            if (content.Length > 400)                                   // check if too long (probably is)
+            {
+                content = content.Substring(0, 400);                    // reduce length
+                content = content.TrimEnd();                            // trim ending whitespace (again)
+                content = Regex.Replace(content, @" [^ ]+$", "...");    // replace last (possibly hanging) word with ellipses
+            }
             return content;
         }
     }

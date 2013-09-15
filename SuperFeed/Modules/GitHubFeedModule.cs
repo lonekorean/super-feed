@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Xml.Linq;
 
 namespace CodersBlock.SuperFeed.Modules
 {
     public class GitHubFeedModule : FeedModuleXml
     {
+        private const int MAX_MESSAGES = 3;
+
         private string _username;
 
         public override string SourceName
@@ -39,7 +42,7 @@ namespace CodersBlock.SuperFeed.Modules
                     {
                         Published = DateTime.Parse(entry.Element(atom + "published").Value),
                         Title = GetTitle(entry.Element(atom + "id").Value),
-                        Snippet = entry.Element(atom + "title").Value,
+                        Snippet = GetSnippet(entry.Element(atom + "content").Value),
                         ViewUri = entry.Element(atom + "link").Attribute("href").Value
                     }
                 ).Take(_totalLimit).ToList<FeedItem>();
@@ -53,6 +56,35 @@ namespace CodersBlock.SuperFeed.Modules
             id = Regex.Match(id, @":(\w+)/").Groups[1].Value;   // extract the part we want
             id = Regex.Replace(id, "([a-z])([A-Z])", "$1 $2");  // turn pascal casing into actual spaces
             return id;
+        }
+
+        private string GetSnippet(string content)
+        {
+            content = HttpUtility.HtmlDecode(content);
+
+            // massage title line from content
+            var titleRegex = new Regex(@"<div class=""title"">\s*(.+?)\s*</div>");
+            var snippet = titleRegex.Match(content).Groups[1].Value
+                .Replace("<span>", "")
+                .Replace("</span>", "")
+                .Replace(" class=\"css-truncate css-truncate-target\"", "")
+                .Replace("href=\"/", "href=\"https://github.com/"); // make relative URLs absolute
+
+            // massage commit messages (if present) from content
+            var messagesRegex = new Regex(@"<div class=""message"">\s*<blockquote>\s*(.+?)\s*</blockquote>");
+            var messageMatches = messagesRegex.Matches(content);
+            if (messageMatches.Count > 0)
+            {
+                var limit = Math.Min(messageMatches.Count, MAX_MESSAGES);
+                var messages = new List<string>(limit);
+                for (var i = 0; i < limit; i++)
+                {
+                    messages.Add(messageMatches[i].Groups[1].Value);
+                }
+                snippet += "<ul><li>" + string.Join("</li><li>", messages) + "</li></ul>";
+            }
+
+            return snippet;
         }
     }
 }
