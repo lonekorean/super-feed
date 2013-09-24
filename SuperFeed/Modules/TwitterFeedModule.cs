@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
-using System.Xml.Linq;
 
 namespace CodersBlock.SuperFeed.Modules
 {
@@ -119,7 +116,9 @@ namespace CodersBlock.SuperFeed.Modules
 
         private DateTime GetPublished(string pubDate)
         {
-            return DateTime.ParseExact(pubDate, "ddd MMM dd HH:mm:ss zzzz yyyy", CultureInfo.InvariantCulture);
+            // sample: "Sun Sep 22 20:28:01 +0000 2013"
+            var parsed = DateTime.ParseExact(pubDate, @"ddd MMM dd HH\:mm\:ss zzzz yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+            return parsed;
         }
 
         private string GetTitle(string source)

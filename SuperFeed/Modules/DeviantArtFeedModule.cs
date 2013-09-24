@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -51,15 +52,12 @@ namespace CodersBlock.SuperFeed.Modules
             return items;
         }
 
-        private DateTime GetPublished(string pubDate)
+        private DateTime GetPublished(string published)
         {
-            // massage the incoming string into something .NET is more inclined to parse
-            string massagedPubDate = pubDate
-                .Substring(5)                   // remove day of week stuff from beginning
-                .Replace("PST", "-08:00")       // replace pacific standard time abbreviation with hour offset to UTC
-                .Replace("PDT", "-07:00");      // replace pacific daylight time abbreviation with hour offset to UTC
-
-            return DateTime.Parse(massagedPubDate);
+            // sample: "Sun, 08 Sep 2013 14:17:34 PDT"
+            published = published.Replace("PST", "-08:00").Replace("PDT", "-07:00");
+            var parsed = DateTime.ParseExact(published, @"ddd, dd MMM yyyy HH\:mm\:ss zzz", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+            return parsed;
         }
     }
 }

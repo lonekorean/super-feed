@@ -40,7 +40,7 @@ namespace CodersBlock.SuperFeed.Modules
                     from entry in doc.Descendants(atom + "entry")
                     select new FeedItem(this)
                     {
-                        Published = DateTime.Parse(entry.Element(atom + "published").Value),
+                        Published = GetPublished(entry.Element(atom + "published").Value),
                         Title = GetTitle(entry.Element(atom + "id").Value),
                         Snippet = GetSnippet(entry.Element(atom + "content").Value),
                         ViewUri = entry.Element(atom + "link").Attribute("href").Value
@@ -49,6 +49,13 @@ namespace CodersBlock.SuperFeed.Modules
             }
             
             return items;
+        }
+
+        private DateTime GetPublished(string published)
+        {
+            // sample: "2013-09-15T21:03:39Z"
+            var parsed = DateTime.ParseExact(published, @"yyyy-MM-ddTHH\:mm\:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+            return parsed;
         }
 
         private string GetTitle(string id)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Web.Script.Serialization;
 
@@ -90,9 +89,10 @@ namespace CodersBlock.SuperFeed.Modules
 
         private DateTime GetPublished(string pubDate)
         {
+            // sample: "1379203714"
             var seconds = int.Parse(pubDate);
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            return epoch.AddSeconds(seconds).AddHours(-4); // shift from GMT to EST
+            return epoch.AddSeconds(seconds);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -38,7 +39,7 @@ namespace CodersBlock.SuperFeed.Modules
                     from entry in doc.Descendants(atom + "entry")
                     select new FeedItem(this)
                     {
-                        Published = DateTime.Parse(entry.Element(atom + "published").Value),
+                        Published = GetPublished(entry.Element(atom + "published").Value),
                         Title = entry.Element(atom + "title").Value,
                         Snippet = GetSnippet(entry.Element(atom + "content").Value),
                         ImagePreviewUri = GetImagePreviewUri((
@@ -56,6 +57,13 @@ namespace CodersBlock.SuperFeed.Modules
             }
             
             return items;
+        }
+
+        private DateTime GetPublished(string published)
+        {
+            // sample: "2013-06-25T06:05:46Z"
+            var parsed = DateTime.ParseExact(published, @"yyyy-MM-ddTHH\:mm\:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+            return parsed;
         }
 
         private string GetSnippet(string content)

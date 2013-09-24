@@ -8,7 +8,6 @@ namespace CodersBlock.SuperFeed
 {
     public static class FeedCoordinator
     {
-        // TODO: yeah, sorry for the iffy comments, some of these are hard to explain
         // constants
         private const int STAGGER_DELAY = 10000;            // stagger time between initial API calls to sources (in ms)
         private const int INTERVAL_DELAY = 900000;          // pause between repeating API calls to same source (in ms)
