@@ -62,7 +62,7 @@ namespace CodersBlock.SuperFeed.Modules
                     string.Format(
                         // must be alphabetical
                         // non-OAuth stuff must also be added to requestQuery
-                        "count={0}&oauth_consumer_key={1}&oauth_nonce={2}&oauth_signature_method={3}&oauth_timestamp={4}&oauth_token={5}&oauth_version={6}&screen_name={7}&trim_user=true",
+                        "count={0}&exclude_replies=true&oauth_consumer_key={1}&oauth_nonce={2}&oauth_signature_method={3}&oauth_timestamp={4}&oauth_token={5}&oauth_version={6}&screen_name={7}&trim_user=true",
                         _totalLimit, _consumerKey, oauthNonce, oauthSignatureMethod, oauthTimestamp, _accessToken, oauthVersion, Uri.EscapeDataString(_username)
                     )
                 );
@@ -79,7 +79,7 @@ namespace CodersBlock.SuperFeed.Modules
                 oauthNonce, oauthSignatureMethod, oauthTimestamp, _consumerKey, _accessToken, Uri.EscapeDataString(oauth_signature), oauthVersion
             );
 
-            var requestQuery = string.Format("count={0}&screen_name={1}&trim_user=true",
+            var requestQuery = string.Format("count={0}&exclude_replies=true&screen_name={1}&trim_user=true",
                 _totalLimit, Uri.EscapeDataString(_username)
             );
 
