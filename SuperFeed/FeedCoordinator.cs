@@ -14,8 +14,8 @@ namespace CodersBlock.SuperFeed
         private const int MAX_PER_SOURCE = 100;             // max items returned from GetFeed()
         private const int MAX_ALL_SOURCES = 20;             // max items returned from GetTopFeed()
         private const int PROMOTE_REPRESENTATION = 2;       // helps GetTopFeed() include items from all sources
-        private const int PROMOTE_STREAK_LIMIT = 3;         // helps GetTopFeed() limit consecutive items from the same source
-        private const int PROMOTE_RECENT = 7;               // helps GetTopFeed() include the freshest items (in days)
+        private const int PROMOTE_STREAK_LIMIT = 2;         // helps GetTopFeed() limit consecutive items from the same source
+        private const int PROMOTE_RECENT = 365;             // helps GetTopFeed() include the freshest items (in days)
         
         // variables
         private static readonly object _lockable = new object();
