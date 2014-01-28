@@ -76,6 +76,7 @@ namespace CodersBlock.SuperFeed.Modules
                 .Replace("</span>", "")
                 .Replace(" class=\"css-truncate css-truncate-target\"", "")
                 .Replace("href=\"/", "href=\"https://github.com/"); // make relative URLs absolute
+            snippet = Regex.Replace(snippet, "<a (.*?)>", "<a $1 target=\"_blank\">");
 
             // massage commit messages (if present) from content
             var messagesRegex = new Regex(@"<div class=""message"">\s*<blockquote>\s*(.+?)\s*</blockquote>");
