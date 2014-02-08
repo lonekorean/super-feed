@@ -27,14 +27,16 @@ Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github
 
 ###Supported Social Media Sites
 
-SuperFeed currently supports six social media sites:
+SuperFeed currently supports 8 social media sites:
 
-- Twitter
 - Blogger
-- Flickr
 - DeviantArt
+- Flickr
 - GitHub
 - Instagram
+- Last.fm
+- Twitter
+- WordPress
 
 The Flickr `FeedModule` requires your Flickr ID. You can get this here: http://idgettr.com/.
 

@@ -12,15 +12,16 @@ namespace SuperFeedConsole
         static void Main(string[] args)
         {
             Console.WriteLine("Starting feed modules...");
-            FeedCoordinator.StartFeedModule(new LastFMFeedModule(50, "25121b1fa3ed5de846be9573da41d858", "lonekorean"));
             FeedCoordinator.StartFeedModule(new BloggerFeedModule(20, "codersblock"));
-            FeedCoordinator.StartFeedModule(new FlickrFeedModule(20, "44589846@N00", "lonekorean"));
             FeedCoordinator.StartFeedModule(new DeviantArtFeedModule(20, "lonekorean"));
+            FeedCoordinator.StartFeedModule(new FlickrFeedModule(20, "44589846@N00", "lonekorean"));
             FeedCoordinator.StartFeedModule(new GitHubFeedModule(30, "lonekorean"));
+            FeedCoordinator.StartFeedModule(new LastFMFeedModule(50, "25121b1fa3ed5de846be9573da41d858", "lonekorean"));
+            FeedCoordinator.StartFeedModule(new WordPressFeedModule(10, "http://codersblock.com/blog/feed/"));
 
             // the following are commented out because they requires private tokens or keys
-            //FeedCoordinator.StartFeedModule(new TwitterFeedModule(80, ...));
-            //FeedCoordinator.StartFeedModule(new InstagramFeedModule(20, ...));
+            //FeedCoordinator.StartFeedModule(new TwitterFeedModule(100, "", "", "", "", ""));
+            //FeedCoordinator.StartFeedModule(new InstagramFeedModule(20, ""));
 
             while (true)
             {
