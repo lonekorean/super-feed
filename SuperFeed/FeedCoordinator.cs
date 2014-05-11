@@ -8,26 +8,33 @@ namespace CodersBlock.SuperFeed
 {
     public static class FeedCoordinator
     {
-        // constants
-        private const int STAGGER_DELAY = 10000;            // stagger time between initial API calls to sources (in ms)
-        private const int INTERVAL_DELAY = 900000;          // pause between repeating API calls to same source (in ms)
-        private const int MAX_PER_SOURCE = 100;             // max items returned from GetFeed()
-        private const int MAX_ALL_SOURCES = 20;             // max items returned from GetTopFeed()
-        private const int PROMOTE_REPRESENTATION = 2;       // helps GetTopFeed() include items from all sources
-        private const int PROMOTE_STREAK_LIMIT = 2;         // helps GetTopFeed() limit consecutive items from the same source
-        private const int PROMOTE_RECENT = 365;             // helps GetTopFeed() include the freshest items (in days)
-        
         // variables
         private static readonly object _lockable = new object();
         private static Dictionary<string, List<FeedItem>> _feeds = new Dictionary<string, List<FeedItem>>();
 
         // properties
         public static DateTime StartTime { get; private set; }
+        public static int StaggerDelay { get; set; }            // stagger time between initial API calls to sources (in ms)
+        public static int IntervalDelay { get; set; }           // pause between repeating API calls to same source (in ms)
+        public static int MaxPerSource { get; set; }            // max items returned from GetFeed()
+        public static int MaxAllSources { get; set; }           // max items returned from GetTopFeed()
+        public static int PromoteRepresentation { get; set; }   // helps GetTopFeed() include items from all sources
+        public static int PromoteStreakLimit { get; set; }      // helps GetTopFeed() limit consecutive items from the same source
+        public static int PromoteRecent { get; set; }           // helps GetTopFeed() include the freshest items (in days)
 
         // static constructor
         static FeedCoordinator()
         {
             StartTime = DateTime.Now;
+
+            // defaults
+            StaggerDelay = 10000;
+            IntervalDelay = 900000;
+            MaxPerSource = 100;
+            MaxAllSources = 20;
+            PromoteRepresentation = 2;
+            PromoteStreakLimit = 2;
+            PromoteRecent = 365;      
         }
 
         /// <summary>
@@ -46,7 +53,7 @@ namespace CodersBlock.SuperFeed
                 UpdateFeed(feedModule);
 
                 // start async loop
-                Task.Factory.StartNew(() => RunFeedLoop(feedModule, _feeds.Count * STAGGER_DELAY), TaskCreationOptions.LongRunning);
+                Task.Factory.StartNew(() => RunFeedLoop(feedModule, _feeds.Count * StaggerDelay), TaskCreationOptions.LongRunning);
             }
         }
 
@@ -61,7 +68,7 @@ namespace CodersBlock.SuperFeed
                 feed = _feeds[sourceName];
             }
 
-            feed = feed.GetRange(0, Math.Min(feed.Count, MAX_PER_SOURCE));
+            feed = feed.GetRange(0, Math.Min(feed.Count, MaxPerSource));
 
             // return a cloned list
             return feed.Select(x => x.Clone()).ToList();
@@ -94,7 +101,7 @@ namespace CodersBlock.SuperFeed
             // promote representation
             foreach (var feed in _feeds.Values)
             {
-                foreach (var feedItem in feed.GetRange(0, Math.Min(feed.Count, PROMOTE_REPRESENTATION)))
+                foreach (var feedItem in feed.GetRange(0, Math.Min(feed.Count, PromoteRepresentation)))
                 {
                     var mergedFeedItem = mergedFeed.First(i => i.ViewUri == feedItem.ViewUri);
                     if(mergedFeedItem != null)
@@ -118,19 +125,19 @@ namespace CodersBlock.SuperFeed
                     mostRecentSourceName = feedItem.SourceName;
                 }
 
-                if (streakCount <= PROMOTE_STREAK_LIMIT)
+                if (streakCount <= PromoteStreakLimit)
                 {
                     feedItem.Weight++;
                 }
             }
 
             // promote recent
-            var somewhatCutOff = DateTime.Now.AddDays(-PROMOTE_RECENT);
+            var somewhatCutOff = DateTime.Now.AddDays(-PromoteRecent);
             mergedFeed.Where(x => x.Published >= somewhatCutOff).ToList().ForEach(x => x.Weight++);
 
             // sort by weight, take the top, resort by published
             mergedFeed.Sort((a, b) => b.CompareTo(a));
-            mergedFeed = mergedFeed.Take(Math.Min(mergedFeed.Count, MAX_ALL_SOURCES)).ToList();
+            mergedFeed = mergedFeed.Take(Math.Min(mergedFeed.Count, MaxAllSources)).ToList();
             mergedFeed.Sort((a, b) => b.Published.CompareTo(a.Published));
 
             return mergedFeed;
@@ -144,7 +151,7 @@ namespace CodersBlock.SuperFeed
             Thread.Sleep(startDelay);
             while (true)
             {
-                Thread.Sleep(INTERVAL_DELAY);
+                Thread.Sleep(IntervalDelay);
                 UpdateFeed(feedModule);
             }
         }

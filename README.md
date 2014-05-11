@@ -21,7 +21,17 @@ Feeds are added and kicked off by passing a `FeedModule` instance into `FeedCoor
 
 If you are using SuperFeed in a web app, then the `Application_Start()` method of your `Global.asax.cs` is a good place for this.
 
-After that, you can retrieve your super feed by calling `GetTopFeed()`. This takes all of your feeds, merges them together, thins things out by applying a weighting algorithm, and gives you the resulting list. The weighting algorithm does a couple of things behind the scenes, but the main goal is to favor diversity and freshness of `FeedItems`.
+After that, you can retrieve your super feed by calling `GetTopFeed()`. This takes all of your feeds, merges them together, thins things out by applying a weighting algorithm, and gives you the resulting list.
+
+`FeedCoordinator` has several public properties that you can tweak to customize its behavior:
+
+- StaggerDelay: stagger time between initial API calls to sources (in ms, default is 10000)
+- IntervalDelay: pause between repeating API calls to same source (in ms, default is 900000)
+- MaxPerSource: max items returned from GetFeed() (default is 100)
+- MaxAllSources: max items returned from GetTopFeed() (default is 20)
+- PromoteRepresentation: helps GetTopFeed() include items from all sources (default is 2)
+- PromoteStreakLimit: helps GetTopFeed() limit consecutive items from the same source (default is 2);
+- PromoteRecent: helps GetTopFeed() include the freshest items (in days, default is 365)
 
 Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github.com/lonekorean/super-feed/blob/master/SuperFeedConsole/Program.cs
 
@@ -30,7 +40,7 @@ Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github
 SuperFeed currently supports 8 social media sites:
 
 - Blogger
-- DeviantArt
+- Dribbble
 - Flickr
 - GitHub
 - Instagram

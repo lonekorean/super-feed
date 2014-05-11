@@ -87,10 +87,10 @@ namespace CodersBlock.SuperFeed.Modules
             return feedItems;
         }
 
-        private DateTime GetPublished(string pubDate)
+        private DateTime GetPublished(string created_time)
         {
             // sample: "1379203714"
-            var seconds = int.Parse(pubDate);
+            var seconds = int.Parse(created_time);
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return epoch.AddSeconds(seconds);
         }

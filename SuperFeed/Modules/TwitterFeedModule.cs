@@ -114,10 +114,10 @@ namespace CodersBlock.SuperFeed.Modules
             return feedItems;
         }
 
-        private DateTime GetPublished(string pubDate)
+        private DateTime GetPublished(string created_at)
         {
             // sample: "Sun Sep 22 20:28:01 +0000 2013"
-            var parsed = DateTime.ParseExact(pubDate, @"ddd MMM dd HH\:mm\:ss zzzz yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+            var parsed = DateTime.ParseExact(created_at, @"ddd MMM dd HH\:mm\:ss zzzz yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
             return parsed;
         }
 
