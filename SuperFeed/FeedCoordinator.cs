@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -9,18 +10,16 @@ namespace CodersBlock.SuperFeed
     public static class FeedCoordinator
     {
         // variables
-        private static readonly object _lockable = new object();
-        private static Dictionary<string, List<FeedItem>> _feeds = new Dictionary<string, List<FeedItem>>();
+        private static ConcurrentDictionary<string, List<FeedItem>> _feeds = new ConcurrentDictionary<string, List<FeedItem>>();
 
         // properties
         public static DateTime StartTime { get; private set; }
-        public static int StaggerDelay { get; set; }            // stagger time between initial API calls to sources (in ms)
-        public static int IntervalDelay { get; set; }           // pause between repeating API calls to same source (in ms)
-        public static int MaxPerSource { get; set; }            // max items returned from GetFeed()
-        public static int MaxAllSources { get; set; }           // max items returned from GetTopFeed()
-        public static int PromoteRepresentation { get; set; }   // helps GetTopFeed() include items from all sources
-        public static int PromoteStreakLimit { get; set; }      // helps GetTopFeed() limit consecutive items from the same source
-        public static int PromoteRecent { get; set; }           // helps GetTopFeed() include the freshest items (in days)
+        public static int StartWaitTime { get; set; }
+        public static int IntervalDelay { get; set; }
+        public static int RetryAttempts { get; set; }
+        public static int RetryDelay { get; set; }
+        public static int WeightedMinPerSource { get; set; }
+        public static int WeightedStreakLimit { get; set; }
 
         // static constructor
         static FeedCoordinator()
@@ -28,93 +27,74 @@ namespace CodersBlock.SuperFeed
             StartTime = DateTime.Now;
 
             // defaults
-            StaggerDelay = 10000;
-            IntervalDelay = 900000;
-            MaxPerSource = 100;
-            MaxAllSources = 20;
-            PromoteRepresentation = 2;
-            PromoteStreakLimit = 2;
-            PromoteRecent = 365;      
+            StartWaitTime = 3000;
+            IntervalDelay = 900000; // 15 minutes
+            RetryAttempts = 3;
+            RetryDelay = 500;
+            WeightedMinPerSource = 2;
+            WeightedStreakLimit = 2;
         }
-
+        
         /// <summary>
-        /// Kicks off a feed module to run in a loop in its own thread.
+        /// Kicks off multiple feed modules together.
         /// </summary>
-        public static void StartFeedModule(FeedModule feedModule)
+        public static void StartFeeds(params FeedModule[] feedModules)
         {
-            // make sure this feed module isn't already added and started
-            if (!_feeds.ContainsKey(feedModule.SourceName))
+            var tasks = new List<Task>(feedModules.Length);
+            foreach (var feedModule in feedModules)
             {
-                // add feed module
-                _feeds.Add(feedModule.SourceName, new List<FeedItem>());
-
-                // run immediately on main thread in a blocking manner
-                // this ensures that we have feeds ready to go before any page requests are handled
-                UpdateFeed(feedModule);
-
-                // start async loop
-                Task.Factory.StartNew(() => RunFeedLoop(feedModule, _feeds.Count * StaggerDelay), TaskCreationOptions.LongRunning);
+                tasks.Add(Task.Factory.StartNew(() => FeedCoordinator.StartFeed(feedModule)));
             }
+            Task.WaitAll(tasks.ToArray(), StartWaitTime);
         }
 
         /// <summary>
-        /// Get feed items from a single source.
+        /// Get feed items from a single source, or null if source doesn't exist.
         /// </summary>
-        public static List<FeedItem> GetFeed(string sourceName)
+        public static List<FeedItem> GetFeed(string sourceName, int count)
         {
             List<FeedItem> feed;
-            lock (_lockable)
+            if (_feeds.TryGetValue(sourceName, out feed))
             {
-                feed = _feeds[sourceName];
+                // get list of clones, not shared references
+                feed = feed.Take(count).Select(i => i.Clone()).ToList();
             }
-
-            feed = feed.GetRange(0, Math.Min(feed.Count, MaxPerSource));
-
-            // return a cloned list
-            return feed.Select(x => x.Clone()).ToList();
+            return feed;
         }
 
         /// <summary>
         /// Get feed items from all sources merged together.
         /// </summary>
-        public static List<FeedItem> GetMergedFeed()
+        public static List<FeedItem> GetMergedFeed(int count)
         {
             var mergedFeed = new List<FeedItem>();
-            foreach (var source in _feeds.Keys)
+            foreach (var sourceName in _feeds.Keys)
             {
-                mergedFeed.AddRange(GetFeed(source));
+                mergedFeed.AddRange(GetFeed(sourceName, int.MaxValue));
             }
 
             // sort by published date descending
             mergedFeed.Sort((a, b) => b.Published.CompareTo(a.Published));
-
-            return mergedFeed;
+            return mergedFeed.Take(count).ToList();
         }
         
         /// <summary>
         /// Get feed items from all sources merged together, with weighting applied.
         /// </summary>
-        public static List<FeedItem> GetTopFeed()
+        public static List<FeedItem> GetWeightedFeed(int count)
         {
-            var mergedFeed = GetMergedFeed();
+            var weightedFeed = GetMergedFeed(int.MaxValue);
 
-            // promote representation
-            foreach (var feed in _feeds.Values)
+            // apply min per source
+            foreach (var sourceName in _feeds.Keys)
             {
-                foreach (var feedItem in feed.GetRange(0, Math.Min(feed.Count, PromoteRepresentation)))
-                {
-                    var mergedFeedItem = mergedFeed.First(i => i.ViewUri == feedItem.ViewUri);
-                    if(mergedFeedItem != null)
-                    {
-                        mergedFeedItem.Weight++;
-                    }
-                }
+                weightedFeed.Where(i => i.SourceName == sourceName).Take(WeightedMinPerSource).ToList().ForEach(i => i.Weight++);
             }
 
-            // promote streak limit
+            // apply streak limit
             var streakCount = 0;
             var mostRecentSourceName = "";
-            foreach (var feedItem in mergedFeed)
+            foreach (var feedItem in weightedFeed)
             {
                 if (feedItem.SourceName == mostRecentSourceName)
                 {
@@ -125,30 +105,38 @@ namespace CodersBlock.SuperFeed
                     mostRecentSourceName = feedItem.SourceName;
                 }
 
-                if (streakCount <= PromoteStreakLimit)
+                if (streakCount <= WeightedStreakLimit)
                 {
                     feedItem.Weight++;
                 }
             }
 
-            // promote recent
-            var somewhatCutOff = DateTime.Now.AddDays(-PromoteRecent);
-            mergedFeed.Where(x => x.Published >= somewhatCutOff).ToList().ForEach(x => x.Weight++);
-
             // sort by weight, take the top, resort by published
-            mergedFeed.Sort((a, b) => b.CompareTo(a));
-            mergedFeed = mergedFeed.Take(Math.Min(mergedFeed.Count, MaxAllSources)).ToList();
-            mergedFeed.Sort((a, b) => b.Published.CompareTo(a.Published));
-
-            return mergedFeed;
+            weightedFeed.Sort((a, b) => b.CompareTo(a));
+            weightedFeed = weightedFeed.Take(count).ToList();
+            weightedFeed.Sort((a, b) => b.Published.CompareTo(a.Published));
+            return weightedFeed;
         }
+
+        /// <summary>
+        /// Kicks off a feed module to run in a loop in its own thread.
+        /// </summary>
+        private static void StartFeed(FeedModule feedModule)
+        {
+            if(_feeds.TryAdd(feedModule.SourceName, new List<FeedItem>()))
+            {
+                // update immediately, then kick off task to keep updating
+                UpdateFeed(feedModule);
+                Task.Factory.StartNew(() => RunFeedLoop(feedModule), TaskCreationOptions.LongRunning);
+            }
+        }
+
 
         /// <summary>
         /// Continues loading a list of feed items in a set interval forever.
         /// </summary>
-        private static void RunFeedLoop(FeedModule feedModule, int startDelay)
+        private static void RunFeedLoop(FeedModule feedModule)
         {
-            Thread.Sleep(startDelay);
             while (true)
             {
                 Thread.Sleep(IntervalDelay);
@@ -161,14 +149,7 @@ namespace CodersBlock.SuperFeed
         /// </summary>
         private static void UpdateFeed(FeedModule feedModule)
         {
-            var feed = feedModule.GetItems();
-            if (feed.Count != 0)
-            {
-                lock (_lockable)
-                {
-                    _feeds[feedModule.SourceName] = feed;
-                }
-            }
+            _feeds[feedModule.SourceName] = feedModule.GetItems();
         }
     }
 }

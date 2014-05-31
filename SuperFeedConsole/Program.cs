@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using CodersBlock.SuperFeed;
 using CodersBlock.SuperFeed.Modules;
 
@@ -12,21 +9,21 @@ namespace SuperFeedConsole
         static void Main(string[] args)
         {
             Console.WriteLine("Starting feed modules...");
-            FeedCoordinator.StartFeedModule(new BloggerFeedModule(20, "codersblock"));
-            FeedCoordinator.StartFeedModule(new DribbbleFeedModule(20, "lonekorean"));
-            FeedCoordinator.StartFeedModule(new FlickrFeedModule(20, "44589846@N00", "lonekorean"));
-            FeedCoordinator.StartFeedModule(new GitHubFeedModule(30, "lonekorean"));
-            FeedCoordinator.StartFeedModule(new LastFMFeedModule(100, "25121b1fa3ed5de846be9573da41d858", "lonekorean"));
-            FeedCoordinator.StartFeedModule(new WordPressFeedModule(10, "http://codersblock.com/blog/feed/"));
 
-            // the following are commented out because they requires private tokens or keys
-            //FeedCoordinator.StartFeedModule(new InstagramFeedModule(20, ""));
-            //FeedCoordinator.StartFeedModule(new TwitterFeedModule(100, "", "", "", "", ""));
+            FeedCoordinator.StartFeeds(
+                new BloggerFeedModule(20, "codersblock"),
+                new DribbbleFeedModule(20, "lonekorean"),
+                new FlickrFeedModule(20, "44589846@N00", "lonekorean"),
+                new GitHubFeedModule(20, "lonekorean"),
+                //new InstagramFeedModule(20, ""),
+                new LastFMFeedModule(20, "25121b1fa3ed5de846be9573da41d858", "lonekorean"),
+                //new TwitterFeedModule(20, "", "", "", "", ""),
+                new WordPressFeedModule(20, "http://codersblock.com/blog/feed/")
+            );
 
             while (true)
             {
-                Console.Clear();
-                var list = FeedCoordinator.GetTopFeed();
+                var list = FeedCoordinator.GetWeightedFeed(20);
                 for (var i = 0; i < list.Count; i++)
                 {
                     var item = list[i];

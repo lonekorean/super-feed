@@ -20,11 +20,11 @@ namespace CodersBlock.SuperFeed
                 }
                 catch
                 {
-                    Thread.Sleep(RETRY_DELAY);
+                    Thread.Sleep(FeedCoordinator.RetryDelay);
                 }
                 attempts++;
             }
-            while (attempts < MAX_ATTEMPTS && doc == null);
+            while (attempts < FeedCoordinator.RetryAttempts && doc == null);
 
             return ParseDocument(doc);
         }

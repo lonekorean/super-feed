@@ -5,10 +5,6 @@ namespace CodersBlock.SuperFeed
 {
     public abstract class FeedModule
     {
-        // constants
-        protected const int MAX_ATTEMPTS = 3;
-        protected const int RETRY_DELAY = 500; // 0.5 seconds
-
         // variables
         protected int _totalLimit;
 
