@@ -9,29 +9,34 @@ You can see SuperFeed in action on my website: http://codersblock.com/.
 
 ###Technical Overview
 
-The focal point of SuperFeed is the `FeedCoordinator`, a singleton object that provides you with a merged list of `FeedItems` from your various social media feeds. It does this by coordinating multiple `FeedModules`, one for each social media site you want to include in your super feed. `FeedModules` run in a separate thread, asynchronously loading feed data from their respective APIs, such that things happening in your main thread (for example, web page requests) are not blocked.
-
-SuperFeed also takes care of various details for you, such as staggered API requests, fault tolerance, and text massaging.
+The focal point of SuperFeed is the `FeedCoordinator`, a static singleton that provides you with a merged list of `FeedItems` from your various social media feeds. It does this by coordinating multiple `FeedModules`, one for each social media site you want to include in your super feed. `FeedModules` continue running in separate threads, asynchronously loading feed data from their respective APIs, such that things happening in your main thread (for example, web page requests) are not blocked.
 
 ###Usage
 
-Feeds are added and kicked off by passing a `FeedModule` instance into `FeedCoordinator.StartFeedModule()`, like this:
+To kick things off, pass instances of the `FeedModules` you want to use to `FeedCoordinator`, like this:
 
-    FeedCoordinator.StartFeedModule(new BloggerFeedModule(20, "codersblock"));
+    FeedCoordinator.StartFeeds(
+        new DribbbleFeedModule(20, "lonekorean"),
+        new GitHubFeedModule(20, "lonekorean"),
+        new WordPressFeedModule(20, "http://codersblock.com/blog/feed/")
+    );
 
-If you are using SuperFeed in a web app, then the `Application_Start()` method of your `Global.asax.cs` is a good place for this.
+`FeedCoordinator` will try to fetch the `FeedItems` for each `FeedModule` immediately, blocking the current thread. This just ensures that if you then immediately ask for loaded feeds, you'll have something to show for it. The maximum time allowed for the block can be configured (or eliminated) via `FeedCoordinator.StartWaitTime`.
 
-After that, you can retrieve your super feed by calling `GetTopFeed()`. This takes all of your feeds, merges them together, thins things out by applying a weighting algorithm, and gives you the resulting list.
+If you are using SuperFeed in a web app, then the `Application_Start()` method of your `Global.asax.cs` is a good place to kick things off.
+
+Once started, you can retrieve your super feed by calling `FeedCoordinator.GetWeightedFeed()`. This takes all of your feeds, merges them together, applies a weighting algorithm, and gives you the resulting list.
+
+###Customization
 
 `FeedCoordinator` has several public properties that you can tweak to customize its behavior:
 
-- StaggerDelay: stagger time between initial API calls to sources (in ms, default is 10000)
-- IntervalDelay: pause between repeating API calls to same source (in ms, default is 900000)
-- MaxPerSource: max items returned from GetFeed() (default is 100)
-- MaxAllSources: max items returned from GetTopFeed() (default is 20)
-- PromoteRepresentation: helps GetTopFeed() include items from all sources (default is 2)
-- PromoteStreakLimit: helps GetTopFeed() limit consecutive items from the same source (default is 2);
-- PromoteRecent: helps GetTopFeed() include the freshest items (in days, default is 365)
+- `StartWaitTime` - Maximum time allotted for initial loading of feeds (in ms, default = 3000)
+- `IntervalDelay` - Delay between repeating API calls to same source (in ms, default = 900000)
+- `RetryAttempts` - How many times to retry a failed API call (default = 3)
+- `RetryDelay` - How long to wait before retrying a failed API call (in ms, default = 500)
+- `WeightedMinPerSource` - Minimum items to gaurantee from each source (default = 2)
+- `WeightedStreakLimit` - Maximum consecutive items from any single source (default = 2);
 
 Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github.com/lonekorean/super-feed/blob/master/SuperFeedConsole/Program.cs
 
