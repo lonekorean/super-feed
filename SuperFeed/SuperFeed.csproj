@@ -48,6 +48,7 @@
     <Compile Include="FeedModuleJson.cs" />
     <Compile Include="FeedModuleXml.cs" />
     <Compile Include="Modules\BloggerFeedModule.cs" />
+    <Compile Include="Modules\CodePenFeedModule.cs" />
     <Compile Include="Modules\DribbbleFeedModule.cs" />
     <Compile Include="Modules\WordPressFeedModule.cs" />
     <Compile Include="Modules\LastFMModule.cs" />

@@ -12,6 +12,7 @@ namespace SuperFeedConsole
 
             FeedCoordinator.StartFeeds(
                 new BloggerFeedModule(20, "codersblock"),
+                new CodePenFeedModule(20, "lonekorean"),
                 new DribbbleFeedModule(20, "lonekorean"),
                 new FlickrFeedModule(20, "44589846@N00", "lonekorean"),
                 new GitHubFeedModule(20, "lonekorean"),

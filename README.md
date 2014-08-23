@@ -42,9 +42,10 @@ Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github
 
 ###Supported Social Media Sites
 
-SuperFeed currently supports 8 social media sites:
+SuperFeed currently supports 9 social media sites:
 
 - Blogger
+- CodePen
 - Dribbble
 - Flickr
 - GitHub
