@@ -64,9 +64,9 @@ namespace CodersBlock.SuperFeed.Modules
             content = Regex.Replace(content, @"<.+?>", " ");            // remove tags
             content = Regex.Replace(content, @"\s+", " ");              // consolidate whitespace
             content = content.Trim();                                   // trim whitespace
-            if (content.Length > 400)                                   // check if too long (probably is)
+            if (content.Length > 250)                                   // check if too long (probably is)
             {
-                content = content.Substring(0, 400);                    // reduce length
+                content = content.Substring(0, 250);                    // reduce length
                 content = content.TrimEnd();                            // trim ending whitespace (again)
                 content = Regex.Replace(content, @" [^ ]+$", "...");    // replace last (possibly hanging) word with ellipses
             }

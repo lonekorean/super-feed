@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace CodersBlock.SuperFeed.Modules
@@ -54,7 +55,14 @@ namespace CodersBlock.SuperFeed.Modules
 
         private string GetSnippet(string description)
         {
-            return description.Replace(" [&#8230;]", "...");
+            description = description.Replace(" [&#8230;]", "...");             // remove trailing ellipses
+            if (description.Length > 250)                                       // check if too long
+            {
+                description = description.Substring(0, 250);                    // reduce length
+                description = description.TrimEnd();                            // trim ending whitespace
+                description = Regex.Replace(description, @" [^ ]+$", "...");    // replace last (possibly hanging) word with ellipses
+            }
+            return description;
         }
     }
 }
