@@ -38,6 +38,7 @@ namespace CodersBlock.SuperFeed.Modules
                         Published = GetPublished(item.Element("pubDate").Value),
                         Title = item.Element("title").Value,
                         Snippet = GetSnippet(item.Element("description").Value),
+                        ImagePreviewUri = GetImagePreviewUri(item.Element("enclosure")),
                         ViewUri = item.Element("link").Value
                     }
                 ).Take(_totalLimit).ToList<FeedItem>();
@@ -63,6 +64,11 @@ namespace CodersBlock.SuperFeed.Modules
                 description = Regex.Replace(description, @" [^ ]+$", "...");    // replace last (possibly hanging) word with ellipses
             }
             return description;
+        }
+
+        private string GetImagePreviewUri(XElement enclosure)
+        {
+            return enclosure == null ? null : enclosure.Attribute("url").Value;
         }
     }
 }
