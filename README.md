@@ -3,15 +3,15 @@ super-feed
 
 Fetches content from various social media feeds to combine into one super feed.
 
-###Example
+### Example
 
 You can see SuperFeed in action on my website: http://codersblock.com/.
 
-###Technical Overview
+### Technical Overview
 
 The focal point of SuperFeed is the `FeedCoordinator`, a static singleton that provides you with a merged list of `FeedItems` from your various social media feeds. It does this by coordinating multiple `FeedModules`, one for each social media site you want to include in your super feed. `FeedModules` continue running in separate threads, asynchronously loading feed data from their respective APIs, such that things happening in your main thread (for example, web page requests) are not blocked.
 
-###Usage
+### Usage
 
 To kick things off, pass instances of the `FeedModules` you want to use to `FeedCoordinator`, like this:
 
@@ -27,7 +27,7 @@ If you are using SuperFeed in a web app, then the `Application_Start()` method o
 
 Once started, you can retrieve your super feed by calling `FeedCoordinator.GetWeightedFeed()`. This takes all of your feeds, merges them together, applies a weighting algorithm, and gives you the resulting list.
 
-###Customization
+### Customization
 
 `FeedCoordinator` has several public properties that you can tweak to customize its behavior:
 
@@ -40,7 +40,7 @@ Once started, you can retrieve your super feed by calling `FeedCoordinator.GetWe
 
 Take a look at `SuperFeedConsole.Program.Main()` for sample code: https://github.com/lonekorean/super-feed/blob/master/SuperFeedConsole/Program.cs
 
-###Supported Social Media Sites
+### Supported Social Media Sites
 
 SuperFeed currently supports 9 social media sites:
 
